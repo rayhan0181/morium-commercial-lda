@@ -16,11 +16,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
-
       - name: Build APK
         run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           if [ -f "./gradlew" ]; then
             chmod +x gradlew
             ./gradlew assembleDebug
