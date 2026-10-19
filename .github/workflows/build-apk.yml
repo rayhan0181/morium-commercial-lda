@@ -20,16 +20,33 @@ jobs:
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
           echo "sdk.dir=$ANDROID_HOME" > local.properties
-          if [ -f "./gradlew" ]; then
+          
+          # Check if build files are in a subdirectory or root
+          if [ -f "gradlew" ]; then
             chmod +x gradlew
             ./gradlew assembleDebug
-          else
+          elif [ -f "app/build.gradle" ] || [ -f "app/build.gradle.kts" ]; then
             gradle assembleDebug
+          else
+            # Search for gradlew or build.gradle in subdirectories
+            SUBDIR=$(find . -maxdepth 2 -name "build.gradle" -o -name "build.gradle.kts" | head -n 1 | xargs dirname)
+            if [ "$SUBDIR" != "" ] && [ "$SUBDIR" != "." ]; then
+              echo "Moving into project directory: $SUBDIR"
+              cd "$SUBDIR"
+              if [ -f "gradlew" ]; then
+                chmod +x gradlew
+                ./gradlew assembleDebug
+              else
+                gradle assembleDebug
+              fi
+            else
+              gradle assembleDebug
+            fi
           fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Morium-Commercial-LDA-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: '**/build/outputs/apk/debug/*.apk'
           
