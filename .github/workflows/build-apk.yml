@@ -17,9 +17,8 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          accept-license: true
+        run: |
+          echo "y" | sdkmanager --licenses || true
 
       - name: Build APK
         run: |
