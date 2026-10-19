@@ -18,6 +18,8 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          accept-license: true
 
       - name: Build APK
         run: |
@@ -29,3 +31,4 @@ jobs:
         with:
           name: Morium-Commercial-LDA-APK
           path: app/build/outputs/apk/debug/*.apk
+          
