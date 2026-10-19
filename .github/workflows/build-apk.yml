@@ -1,4 +1,4 @@
-name: Build Morium APK
+name: Build APK
 
 on:
   workflow_dispatch:
@@ -19,34 +19,22 @@ jobs:
       - name: Build APK
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
           
-          # Check if build files are in a subdirectory or root
-          if [ -f "gradlew" ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          elif [ -f "app/build.gradle" ] || [ -f "app/build.gradle.kts" ]; then
-            gradle assembleDebug
-          else
-            # Search for gradlew or build.gradle in subdirectories
-            SUBDIR=$(find . -maxdepth 2 -name "build.gradle" -o -name "build.gradle.kts" | head -n 1 | xargs dirname)
-            if [ "$SUBDIR" != "" ] && [ "$SUBDIR" != "." ]; then
-              echo "Moving into project directory: $SUBDIR"
-              cd "$SUBDIR"
-              if [ -f "gradlew" ]; then
-                chmod +x gradlew
-                ./gradlew assembleDebug
-              else
-                gradle assembleDebug
-              fi
-            else
-              gradle assembleDebug
-            fi
+          # Find the directory containing build.gradle or settings.gradle
+          PROJECT_DIR=$(find . -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1 | xargs dirname)
+          if [ -z "$PROJECT_DIR" ]; then
+            PROJECT_DIR="."
           fi
+          
+          echo "Found project directory at: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Morium-Commercial-LDA-APK
+          name: WarehouseBilling-Debug-APK
           path: '**/build/outputs/apk/debug/*.apk'
           
